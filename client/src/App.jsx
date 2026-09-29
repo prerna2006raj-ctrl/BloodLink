@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import CreateRequest from './pages/CreateRequest';
 import Dashboard from './pages/Dashboard';
+import AdminPanel from './pages/AdminPanel';
 
 function App() {
   const [page, setPage] = useState('dashboard');
@@ -14,8 +15,13 @@ function App() {
         <button onClick={() => setPage('create')} className="font-medium text-gray-700 hover:text-red-600">
           Raise Request
         </button>
+        <button onClick={() => setPage('admin')} className="font-medium text-gray-700 hover:text-red-600">
+          Admin Panel
+        </button>
       </nav>
-      {page === 'dashboard' ? <Dashboard /> : <CreateRequest />}
+      {page === 'dashboard' && <Dashboard />}
+      {page === 'create' && <CreateRequest />}
+      {page === 'admin' && <AdminPanel />}
     </div>
   );
 }
