@@ -1,89 +1,42 @@
-# BloodLink — Blood Bank & Donor-Hospital Matching System
+# Blood Bank & Donor-Hospital Matching System
 
-A full-stack DBMS-focused project that matches hospital blood requests with compatible, non-expired blood units. The project demonstrates relational database concepts such as stored procedures, triggers/events, transactions, row-level locking, and concurrency control alongside a full-stack web application.
+A full-stack DBMS-focused project that matches hospital blood requests to compatible, non-expired blood units in real time — built to demonstrate relational database concepts (stored procedures, triggers/events, transactions, and concurrency control) alongside a full-stack web application.
 
 ## Problem Statement
 
-Hospitals often struggle to quickly locate compatible blood units during emergencies, especially when managing blood inventory across multiple blood banks. Manual tracking can also result in blood units expiring unnoticed or the same unit being allotted to multiple requests.
-
-**BloodLink** automates blood compatibility matching, expiry tracking, and safe blood-unit allotment.
+Hospitals often struggle to quickly locate compatible blood units during emergencies, especially across multiple blood banks. Manual tracking also risks blood units expiring unnoticed or being allotted to two requests at once. This system automates compatibility matching, expiry tracking, and safe allotment.
 
 ## Key Features
 
-* **Blood Group Compatibility Matching** — Automatically finds blood units compatible with the requested blood group and Rh factor.
-* **FIFO Allotment** — Among compatible units, the unit closest to expiry is selected first to reduce blood wastage.
-* **Automatic Expiry Tracking** — A scheduled MySQL Event automatically marks blood units as expired after their expiry date.
-* **Transaction-Safe Allotment** — Uses `SELECT ... FOR UPDATE` row-level locking inside a transaction to prevent the same blood unit from being allotted to two requests simultaneously.
-* **Hospital Blood Requests** — Hospitals can create and manage blood requests.
-* **Real-Time Matching API** — Backend APIs allow compatible blood units to be searched and allotted.
+- **Blood group compatibility matching** — automatically finds all donor blood groups compatible with a requested group (e.g., O- can donate to anyone)
+- **FIFO allotment** — among compatible units, the one closest to expiry is allotted first, minimizing wastage
+- **Auto-expiry** — a scheduled MySQL Event automatically marks blood units as expired once they pass their shelf life, without any application-side logic
+- **Transaction-safe allotment** — uses `SELECT ... FOR UPDATE` row-level locking inside a transaction to guarantee a blood unit can never be allotted to two requests simultaneously (verified via concurrent-session testing)
 
 ## Tech Stack
 
-| Layer             | Technology                                                           |
-| ----------------- | -------------------------------------------------------------------- |
-| Database          | MySQL                                                                |
-| Backend           | Node.js, Express.js, mysql2                                          |
-| Frontend          | React, Tailwind CSS *(in progress)*                                  |
-| Database Concepts | Stored Procedures, Events, Triggers, Transactions, Row-Level Locking |
+- **Database:** MySQL (stored procedures, triggers/events, transactions)
+- **Backend:** Node.js, Express, mysql2
+- **Frontend:** React, Tailwind CSS *(in progress)*
 
 ## Database Design
 
-The database follows a normalized relational design with **6 main tables**:
+6 normalized tables (3NF): `Donor`, `BloodBank`, `BloodUnit`, `Hospital`, `BloodRequest`, `Allotment`.
 
-* `Donor`
-* `BloodBank`
-* `BloodUnit`
-* `Hospital`
-* `BloodRequest`
-* `Allotment`
-
-### DBMS Concepts Demonstrated
-
-| Concept                        | Implementation                                                  |
-| ------------------------------ | --------------------------------------------------------------- |
-| Stored Procedure               | `FindMatchingUnits` — compatibility matching and FIFO selection |
-| Stored Procedure + Transaction | `AllotBloodUnit` — safe allotment using row-level locking       |
-| MySQL Event                    | `expire_old_units` — automatic blood-unit expiry                |
-| Multi-table Joins              | Blood-request listing with hospital information                 |
-| Transactions                   | Ensures safe and consistent blood-unit allotment                |
-| Concurrency Control            | `SELECT ... FOR UPDATE` prevents double-allotment               |
-
-## Project Structure
-
-```text
-BloodLink/
-│
-├── database/
-│   ├── 01_bloodbank_schema.sql
-│   ├── 02_procedures.sql
-│   ├── 03_triggers_events.sql
-│   ├── 04_seed.sql
-│   └── 05_allotment_procedure.sql
-│
-├── server/
-│   ├── config/
-│   │   └── db.js
-│   ├── routes/
-│   │   └── bloodRoutes.js
-│   ├── index.js
-│   ├── package.json
-│   └── package-lock.json
-│
-├── client/              # Frontend - in progress
-│
-├── .gitignore
-└── README.md
-```
+Key DBMS concepts demonstrated:
+| Concept | Where |
+|---|---|
+| Stored Procedure | `FindMatchingUnits` — compatibility + FIFO logic |
+| Stored Procedure + Transaction | `AllotBloodUnit` — row-locking to prevent double-allotment |
+| Trigger/Event | `expire_old_units` — nightly auto-expiry of blood units |
+| Multi-table Joins | Request listing joins `BloodRequest` with `Hospital` |
 
 ## Setup Instructions
 
-### 1. Database Setup
-
-Run the SQL files in the following order:
-
+### 1. Database setup
+Run the SQL files **in this exact order**:
 ```bash
 cd database
-
 mysql -u root -p < 01_bloodbank_schema.sql
 mysql -u root -p < 02_procedures.sql
 mysql -u root -p < 03_triggers_events.sql
@@ -91,43 +44,75 @@ mysql -u root -p < 04_seed.sql
 mysql -u root -p < 05_allotment_procedure.sql
 ```
 
-### 2. Backend Setup
-
-Navigate to the server directory:
-
+### 2. Backend setup
 ```bash
 cd server
 npm install
 ```
+# Blood Bank & Donor-Hospital Matching System
 
-Create a `.env` file inside `server/`:
+A full-stack DBMS-focused project that matches hospital blood requests to compatible, non-expired blood units in real time — built to demonstrate relational database concepts (stored procedures, triggers/events, transactions, and concurrency control) alongside a full-stack web application.
 
-```env
+## Problem Statement
+
+Hospitals often struggle to quickly locate compatible blood units during emergencies, especially across multiple blood banks. Manual tracking also risks blood units expiring unnoticed or being allotted to two requests at once. This system automates compatibility matching, expiry tracking, and safe allotment.
+
+## Key Features
+
+- **Blood group compatibility matching** — automatically finds all donor blood groups compatible with a requested group (e.g., O- can donate to anyone)
+- **FIFO allotment** — among compatible units, the one closest to expiry is allotted first, minimizing wastage
+- **Auto-expiry** — a scheduled MySQL Event automatically marks blood units as expired once they pass their shelf life, without any application-side logic
+- **Transaction-safe allotment** — uses `SELECT ... FOR UPDATE` row-level locking inside a transaction to guarantee a blood unit can never be allotted to two requests simultaneously (verified via concurrent-session testing)
+
+## Tech Stack
+
+- **Database:** MySQL (stored procedures, triggers/events, transactions)
+- **Backend:** Node.js, Express, mysql2
+- **Frontend:** React, Tailwind CSS *(in progress)*
+
+## Database Design
+
+6 normalized tables (3NF): `Donor`, `BloodBank`, `BloodUnit`, `Hospital`, `BloodRequest`, `Allotment`.
+
+Key DBMS concepts demonstrated:
+| Concept | Where |
+|---|---|
+| Stored Procedure | `FindMatchingUnits` — compatibility + FIFO logic |
+| Stored Procedure + Transaction | `AllotBloodUnit` — row-locking to prevent double-allotment |
+| Trigger/Event | `expire_old_units` — nightly auto-expiry of blood units |
+| Multi-table Joins | Request listing joins `BloodRequest` with `Hospital` |
+
+## Setup Instructions
+
+### 1. Database setup
+Run the SQL files **in this exact order**:
+```bash
+cd database
+mysql -u root -p < 01_bloodbank_schema.sql
+mysql -u root -p < 02_procedures.sql
+mysql -u root -p < 03_triggers_events.sql
+mysql -u root -p < 04_seed.sql
+mysql -u root -p < 05_allotment_procedure.sql
+```
+
+### 2. Backend setup
+```bash
+cd server
+npm install
+```
+Create a `.env` file in `server/` with:
 DB_HOST=localhost
 DB_USER=root
 DB_PASSWORD=your_mysql_password
 DB_NAME=bloodbank_db
 PORT=5000
-```
 
 Start the server:
-
 ```bash
 node index.js
 ```
 
-The backend will run on:
-
-```text
-http://localhost:5000
-```
-
-### 3. Frontend Setup
-
-The React frontend is currently under development.
-
-Once the client is available:
-
+### 3. Frontend setup
 ```bash
 cd client
 npm install
@@ -136,40 +121,17 @@ npm run dev
 
 ## API Endpoints
 
-| Method | Endpoint                                           | Description                                            |
-| ------ | -------------------------------------------------- | ------------------------------------------------------ |
-| GET    | `/api/blood/match?blood_group=A%2B&units_needed=2` | Find compatible, non-expired blood units in FIFO order |
-| POST   | `/api/blood/allot`                                 | Allot a blood unit to a request                        |
-| POST   | `/api/blood/requests`                              | Create a new blood request                             |
-| GET    | `/api/blood/requests`                              | List all blood requests                                |
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/blood/match?blood_group=A+&units_needed=2` | Find compatible, non-expired units (FIFO order) |
+| POST | `/api/blood/allot` | Allot a specific unit to a request (transaction-safe) |
+| POST | `/api/blood/requests` | Create a new blood request |
+| GET | `/api/blood/requests` | List all requests |
 
-## Concurrency Demonstration
+## Concurrency Demo
 
-The project demonstrates transaction isolation using two separate MySQL sessions attempting to access the same blood unit simultaneously.
-
-Both sessions attempt to use:
-
-```sql
-SELECT ... FOR UPDATE;
-```
-
-The second transaction waits while the first transaction holds the row lock. After the first transaction commits, the second transaction continues.
-
-This demonstrates how **row-level locking and transactions** can prevent the same blood unit from being allotted to multiple requests concurrently.
-
-## Future Enhancements
-
-* Geo-based donor matching
-* Hospital-to-donor distance calculation
-* Donor availability tracking
-* Emergency request prioritization
-* Blood inventory dashboard
-* Authentication and role-based access
-* React-based hospital and blood-bank dashboards
-* Notifications for critical blood shortages
+To verify transaction isolation, two separate MySQL sessions were run simultaneously, both attempting `SELECT ... FOR UPDATE` on the same blood unit. The second session correctly blocked until the first session's transaction committed — confirming row-level locking prevents double-allotment even under concurrent access.
 
 ## Author
 
-**Prerna Raj**
-
-BCA — Chitkara University
+Prerna — BCA, Chitkara University

@@ -1,5 +1,6 @@
--- 05_allotment_procedure.sql
 USE bloodbank_db;
+
+DROP PROCEDURE IF EXISTS AllotBloodUnit;
 
 DELIMITER //
 
@@ -10,6 +11,11 @@ CREATE PROCEDURE AllotBloodUnit(
 )
 BEGIN
     DECLARE v_status VARCHAR(20);
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        SET p_result = 'FAILED: Unit already allotted';
+    END;
 
     START TRANSACTION;
 
