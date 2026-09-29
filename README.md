@@ -34,6 +34,12 @@ Key DBMS concepts demonstrated:
 | Multi-table Joins | Request listing joins `BloodRequest` with `Hospital`; inventory view joins `BloodUnit` with `Donor` and `BloodBank` |
 | Referential Integrity | Foreign key constraints across all relationship tables (e.g., prevents deleting a request that already has an allotment) |
 
+## Database Design
+
+![ER Diagram](screenshots/er-diagram.png)
+
+6 normalized tables (3NF): `Donor`, `BloodBank`, `BloodUnit`, `Hospital`, `BloodRequest`, `Allotment`.
+
 ## Setup Instructions
 
 ### 1. Database setup
