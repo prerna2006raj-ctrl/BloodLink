@@ -1,5 +1,5 @@
 -- 02_procedures.sql
--- USE bloodbank_db;
+USE bloodbank_db;
 
 DROP PROCEDURE IF EXISTS FindMatchingUnits;
 
