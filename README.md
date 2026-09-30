@@ -1,4 +1,8 @@
 # Blood Bank & Donor-Hospital Matching System
+🔗 **Live Demo:** [https://blood-link-jet.vercel.app](https://blood-link-jet.vercel.app)
+🔗 **Backend API:** [https://bloodlink-6da9.onrender.com](https://bloodlink-6da9.onrender.com)
+
+*(Note: backend is on Render's free tier — first request after inactivity may take 20-30 seconds to wake up)*
 
 A full-stack DBMS-focused project that matches hospital blood requests to compatible, non-expired blood units in real time — built to demonstrate relational database concepts (stored procedures, triggers/events, transactions, and concurrency control) alongside a full-stack web application.
 
