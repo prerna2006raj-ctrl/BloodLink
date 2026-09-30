@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import api from '../api';
 
 const bloodGroups = ['A+','A-','B+','B-','AB+','AB-','O+','O-'];
 
 export default function CreateRequest() {
+  const [hospitals, setHospitals] = useState([]);
   const [form, setForm] = useState({
     hospital_id: '',
     blood_group: 'A+',
@@ -11,6 +12,10 @@ export default function CreateRequest() {
     urgency: 'normal'
   });
   const [message, setMessage] = useState('');
+
+  useEffect(() => {
+    api.get('/hospitals').then(res => setHospitals(res.data));
+  }, []);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -33,61 +38,42 @@ export default function CreateRequest() {
       <h2 className="text-xl font-bold mb-4">Raise Blood Request</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium mb-1">Hospital ID</label>
-          <input
-            type="number"
+          <label className="block text-sm font-medium mb-1">Hospital</label>
+          <select
             name="hospital_id"
             value={form.hospital_id}
             onChange={handleChange}
             required
             className="w-full border rounded px-3 py-2"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium mb-1">Blood Group</label>
-          <select
-            name="blood_group"
-            value={form.blood_group}
-            onChange={handleChange}
-            className="w-full border rounded px-3 py-2"
           >
-            {bloodGroups.map((bg) => (
-              <option key={bg} value={bg}>{bg}</option>
+            <option value="">Select Hospital</option>
+            {hospitals.map((h) => (
+              <option key={h.hospital_id} value={h.hospital_id}>{h.name}</option>
             ))}
           </select>
         </div>
 
         <div>
+          <label className="block text-sm font-medium mb-1">Blood Group</label>
+          <select name="blood_group" value={form.blood_group} onChange={handleChange} className="w-full border rounded px-3 py-2">
+            {bloodGroups.map((bg) => <option key={bg} value={bg}>{bg}</option>)}
+          </select>
+        </div>
+
+        <div>
           <label className="block text-sm font-medium mb-1">Units Needed</label>
-          <input
-            type="number"
-            name="units_needed"
-            min="1"
-            value={form.units_needed}
-            onChange={handleChange}
-            required
-            className="w-full border rounded px-3 py-2"
-          />
+          <input type="number" name="units_needed" min="1" value={form.units_needed} onChange={handleChange} required className="w-full border rounded px-3 py-2" />
         </div>
 
         <div>
           <label className="block text-sm font-medium mb-1">Urgency</label>
-          <select
-            name="urgency"
-            value={form.urgency}
-            onChange={handleChange}
-            className="w-full border rounded px-3 py-2"
-          >
+          <select name="urgency" value={form.urgency} onChange={handleChange} className="w-full border rounded px-3 py-2">
             <option value="normal">Normal</option>
             <option value="critical">Critical</option>
           </select>
         </div>
 
-        <button
-          type="submit"
-          className="w-full bg-red-600 text-white py-2 rounded hover:bg-red-700"
-        >
+        <button type="submit" className="w-full bg-red-600 text-white py-2 rounded hover:bg-red-700">
           Submit Request
         </button>
 
