@@ -3,7 +3,7 @@
 🔗 **Live Demo:** [https://blood-link-jet.vercel.app](https://blood-link-jet.vercel.app)
 🔗 **Backend API:** [https://bloodlink-6da9.onrender.com](https://bloodlink-6da9.onrender.com)
 
-*(Note: backend is on Render's free tier — first request after inactivity may take 20-30 seconds to wake up)*
+_(Note: backend is on Render's free tier — first request after inactivity may take 20-30 seconds to wake up)_
 
 A full-stack DBMS-focused project that matches hospital blood requests to compatible, non-expired blood units in real time — built to demonstrate relational database concepts (stored procedures, triggers/events, transactions, and concurrency control) alongside a full-stack web application.
 
@@ -15,16 +15,18 @@ Hospitals often struggle to quickly locate compatible blood units during emergen
 
 - **Blood group compatibility matching** — automatically finds all donor blood groups compatible with a requested group (e.g., O- can donate to anyone, AB+ can receive from anyone)
 - **FIFO allotment** — among compatible units, the one closest to expiry is allotted first, minimizing wastage
+- **Geo-based distance sorting** — calculates real-world distance (Haversine formula) between each matched unit's blood bank and the requesting hospital, using stored latitude/longitude, so the nearest usable unit can be prioritized for emergencies
 - **Auto-expiry** — a scheduled MySQL Event automatically marks blood units as expired once they pass their shelf life, without any application-side logic
 - **Transaction-safe allotment** — uses `SELECT ... FOR UPDATE` row-level locking inside a transaction to guarantee a blood unit can never be allotted to two requests simultaneously, with exception handling to prevent crashes on constraint conflicts (verified via concurrent-session testing)
 - **Admin Panel** — add donors and blood units, and view a live, color-coded inventory (available / allotted / expired) sorted by expiry date
-- **Hospital Dashboard** — raise blood requests, find compatible matches, and allot units in a single flow
+- **Hospital Dashboard** — raise blood requests, find compatible matches (sorted by distance), and allot units in a single flow
 
 ## Demo
 
 ![Full flow demo](screenshots/demo-flow.gif)
 
 ### Concurrency / ACID Demo
+
 ![Two-terminal lock demo](screenshots/concurrency-demo.gif)
 
 ## Tech Stack
@@ -47,11 +49,14 @@ Key DBMS concepts demonstrated:
 | Trigger/Event | `expire_old_units` — nightly auto-expiry of blood units |
 | Multi-table Joins | Request listing joins `BloodRequest` with `Hospital`; inventory view joins `BloodUnit` with `Donor` and `BloodBank` |
 | Referential Integrity | Foreign key constraints across all relationship tables (e.g., prevents deleting a request that already has an allotment) |
+| Geospatial Calculation | Haversine distance between hospital and blood bank coordinates (stored as `latitude`/`longitude` in `Hospital` and `BloodBank`), computed in the backend from matched results |
 
 ## Setup Instructions
 
 ### 1. Database setup
+
 Run the SQL files **in this exact order**:
+
 ```bash
 cd database
 mysql -u root -p < 01_bloodbank_schema.sql
@@ -62,10 +67,12 @@ mysql -u root -p < 05_allotment_procedure.sql
 ```
 
 ### 2. Backend setup
+
 ```bash
 cd server
 npm install
 ```
+
 Create a `.env` file in `server/` with:
 DB_HOST=localhost
 DB_USER=root
@@ -74,11 +81,13 @@ DB_NAME=bloodbank_db
 PORT=5000
 
 Start the server:
+
 ```bash
 node index.js
 ```
 
 ### 3. Frontend setup
+
 ```bash
 cd client
 npm install
@@ -87,18 +96,18 @@ npm run dev
 
 ## API Endpoints
 
-| Method | Endpoint | Description |
-|---|---|---|
-| GET | `/api/blood/match?blood_group=A+&units_needed=2` | Find compatible, non-expired units (FIFO order) |
-| POST | `/api/blood/allot` | Allot a specific unit to a request (transaction-safe) |
-| POST | `/api/blood/requests` | Create a new blood request |
-| GET | `/api/blood/requests` | List all requests |
-| GET | `/api/blood/units` | List full blood unit inventory with donor/bank details |
-| POST | `/api/blood/units` | Add a new blood unit |
-| GET | `/api/blood/donors` | List all donors |
-| POST | `/api/blood/donors` | Add a new donor |
-| GET | `/api/blood/banks` | List all blood banks |
-| GET | `/api/blood/hospitals` | List all hospitals |
+| Method | Endpoint                                         | Description                                            |
+| ------ | ------------------------------------------------ | ------------------------------------------------------ |
+| GET    | `/api/blood/match?blood_group=A+&units_needed=2` | Find compatible, non-expired units (FIFO order)        |
+| POST   | `/api/blood/allot`                               | Allot a specific unit to a request (transaction-safe)  |
+| POST   | `/api/blood/requests`                            | Create a new blood request                             |
+| GET    | `/api/blood/requests`                            | List all requests                                      |
+| GET    | `/api/blood/units`                               | List full blood unit inventory with donor/bank details |
+| POST   | `/api/blood/units`                               | Add a new blood unit                                   |
+| GET    | `/api/blood/donors`                              | List all donors                                        |
+| POST   | `/api/blood/donors`                              | Add a new donor                                        |
+| GET    | `/api/blood/banks`                               | List all blood banks                                   |
+| GET    | `/api/blood/hospitals`                           | List all hospitals                                     |
 
 ## Concurrency Demo
 
